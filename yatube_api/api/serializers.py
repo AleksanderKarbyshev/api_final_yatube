@@ -4,6 +4,7 @@ from posts.models import Comment, Post, Group, Follow, User
 
 
 class AuthorSerializer(serializers.SlugRelatedField):
+
     def __init__(self, *args, **kwargs):
         kwargs['slug_field'] = 'username'
         kwargs['read_only'] = True
@@ -20,6 +21,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = AuthorSerializer()
+
     class Meta:
         fields = '__all__'
         model = Comment
