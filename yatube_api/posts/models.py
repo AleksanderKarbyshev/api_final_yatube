@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
@@ -106,16 +105,16 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'подписка'
         verbose_name_plural = 'Подписки'
-        unique_together = ('user', 'following')
-
-    def clean(self):
-        if self.user == self.following:
-            raise ValidationError(
-                'Извините, но подписаться на самого себя нельзя :(')
-        if Follow.objects.filter(
-                user=self.user,
-                following=self.following).exists():
-            raise ValidationError('Вы уже подписаны на этого автора.')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'],
+                name='unique_follow'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('following')),
+                name='no_self_follow'
+            )
+        ]
 
     def __str__(self):
         return (f'{self.user} подписан на {self.following}')
